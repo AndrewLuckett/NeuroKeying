@@ -10,9 +10,9 @@ class Net:
     def __init__(this, **kwargs):
         if kwargs.get("layers"): #List of matrices
             this.layers = kwargs.get("layers")
+            this.dimension.append(this.layers[0].getSize()[1] - 1)
             for i in this.layers:
-                this.dimension.append(i.getSize()[0] - 1)
-            this.dimension.append(this.layers[-1].getSize()[1])
+                this.dimension.append(i.getSize()[0])
             
         elif kwargs.get("dat"): #list of 2d arrays to be turned into matrices
             pass
@@ -30,13 +30,12 @@ class Net:
         this.learningRate = kwargs.get("learningRate") or 0.2
         this.activator = kwargs.get("activator") or Activators.linear
                 
-    def getOutput(this,inp):
+    def getOutput(this,inp): #Dont forget bias value
         if type(inp) == list:
             inp = Matrix((len(inp),1),inp)
         if type(inp) != Matrix:
             raise Exception("Invalid argument type")
         if inp.getSize() != (this.dimension[0]+1,1):
-            print(inp)
             raise Exception("Bad input size")
 
         for layer in this.layers:

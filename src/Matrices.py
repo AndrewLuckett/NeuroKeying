@@ -6,11 +6,12 @@ class Matrix:
         this.width = size[1]
         if len(dat) == 0:
             this.vals = [0]*this.height*this.width
-        elif len(dat) == this.width:
-            for i in dat:
-                this.vals.extend(i)
+        
         elif len(dat) == this.width * this.height:
             this.vals = dat.copy()
+        elif len(dat) == this.width: #Assuming 2d
+            for i in dat:
+                this.vals.extend(i)
         else:
             raise Exception("Cannot read data")
 
@@ -45,7 +46,7 @@ class Matrix:
         
         new = []
 
-        for(
+        #for(
     
     def getRaw(this):
         return this.vals

@@ -41,12 +41,17 @@ class Matrix:
         return Matrix(outSize,out)
 
     def __add__(this,other):
+        otherSize = other.getSize()
+        
         if this.width != otherSize[0]:
-            raise Exception("Cant mult")
+            raise Exception("Cant add")
+        if this.height != otherSize[1]:
+            raise Exception("Cant add")
         
         new = []
-
-        #for(
+        for i,j in zip(other.getRaw(),this.vals):
+            new.append(i+j)
+        return Matrix(otherSize,new)
     
     def getRaw(this):
         return this.vals

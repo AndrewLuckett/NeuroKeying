@@ -43,9 +43,7 @@ class Matrix:
     def __add__(this,other):
         otherSize = other.getSize()
         
-        if this.width != otherSize[0]:
-            raise Exception("Cant add")
-        if this.height != otherSize[1]:
+        if this.getSize() != otherSize:
             raise Exception("Cant add")
         
         new = []

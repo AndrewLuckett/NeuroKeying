@@ -1,12 +1,11 @@
 from Matrices import *
-
+import Activators
 
 class Net:
     dimension = [] #dimension[0] is how many inputs
     #All other cells describe how many neurons in layer
     
     layers = [] #List of matrices
-    learningRate = 0.2
     
     def __init__(this, **kwargs):
         if kwargs.get("layers"): #List of matrices
@@ -28,8 +27,8 @@ class Net:
         else: #Needs some kind of init data
             raise Exception("Insuficient arguments")
 
-        if kwargs.get("learningRate"):
-            this.learningRate = kwargs.get("learningRate")
+        this.learningRate = kwargs.get("learningRate") or 0.2
+        this.activator = kwargs.get("activator") or Activators.linear
                 
     def getOutput(this,inp):
         if type(inp) == list:
@@ -37,18 +36,17 @@ class Net:
         if type(inp) != Matrix:
             raise Exception("Invalid argument type")
         if inp.getSize() != (this.dimension[0]+1,1):
+            print(inp)
             raise Exception("Bad input size")
 
         for layer in this.layers:
             #print("P: "+str(inp))
             out = layer * inp
+            out = out.getRaw() #Get as array
+            out = this.activator(out) #Apply activator
+            out.insert(0,1.0) #Add 1 at at start for bias
             
-            out = out.getRaw()
-
-            #Apply activation function here
-            
-            out.insert(0,1.0)
-            inp = Matrix((len(out),1),out)
+            inp = Matrix((len(out),1),out) #turn into matrix and overwrite inp
 
         return inp
 

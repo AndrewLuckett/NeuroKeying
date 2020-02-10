@@ -2,6 +2,11 @@
 class Matrix:
     def __init__(this, size, dat = []):
         this.vals = []
+
+        if type(size) == Matrix: #CopyOf
+            dat = size.vals
+            size = size.getSize()
+        
         this.height = size[0]
         this.width = size[1]
         
@@ -14,10 +19,21 @@ class Matrix:
                 this.vals.extend(i)
         else:
             raise Exception("Cannot read data")
-        
+
+
+    def __eq__(this, other):
+        if this.getSize() != other.getSize():
+            return False
+
+        for i, j in zip(this.vals, other.getRaw()):
+            if i != j:
+                return False
+
+        return True
+    
 
     def scalarMult(this, val):
-        if type(val) not in [int,float]:
+        if type(val) not in [int,float,complex]:
             raise Exception("Cant mult type " + str(type(val)))
         
         out = []

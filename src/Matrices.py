@@ -6,6 +6,9 @@ class Matrix:
         if type(size) == Matrix: #CopyOf
             dat = size.vals
             size = size.getSize()
+            
+        if type(size) != tuple and len(size) < 2:
+            raise Exception("Invalid size value")
         
         this.height = size[0]
         this.width = size[1]
@@ -22,6 +25,9 @@ class Matrix:
 
 
     def __eq__(this, other):
+        if type(other) != Matrix:
+            return False
+        
         if this.getSize() != other.getSize():
             return False
 
@@ -30,7 +36,7 @@ class Matrix:
                 return False
 
         return True
-    
+
 
     def scalarMult(this, val):
         if type(val) not in [int,float,complex]:
@@ -66,6 +72,9 @@ class Matrix:
 
 
     def __add__(this, other):
+        if type(other) != Matrix:
+            raise Exception("Cant add with non Matrix type")
+        
         otherSize = other.getSize()
         
         if this.getSize() != otherSize:
@@ -77,7 +86,10 @@ class Matrix:
         return Matrix(otherSize, new)
 
 
-    def __sub__(this, other):
+    def __sub__(this, other): #Merge with add and have bool signing?
+        if type(other) != Matrix:
+            raise Exception("Cant subtract with non Matrix type")
+        
         otherSize = other.getSize()
         
         if this.getSize() != otherSize:
@@ -88,7 +100,15 @@ class Matrix:
             new.append(i - j)
         return Matrix(otherSize, new)
 
-    
+
+    def __neg__(this):
+        return this * -1
+
+
+    def __pos__(this):
+        return this
+
+
     def getRaw(this):
         return this.vals
 

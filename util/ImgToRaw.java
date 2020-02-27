@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 class ImgToRaw {
     BufferedImage img;
     int mode;
+	int border;
     boolean alpha;
 
     public ImgToRaw(String args[]) throws Exception {
@@ -19,7 +20,12 @@ class ImgToRaw {
         }
 
         mode = args.length > 2 ? Integer.parseInt(args[2]) : 1;
-        alpha = args.length > 3;
+		border = mode;
+        alpha = args.length > 3; //is output
+		
+		if(alpha){
+			mode = 0;
+		}
 
         load(args[0]);
 
@@ -41,14 +47,14 @@ class ImgToRaw {
     }
 
     public void foreachLine(Consumer<String> line) {
-        line.accept(img.getWidth() + "," + img.getHeight() + ",");
-        for (int y = mode; y < img.getHeight() - mode; y++) {
-            for (int x = mode; x < img.getWidth() - mode; x++) {
+        line.accept((img.getWidth()-border*2) + "," + (img.getHeight()-border*2) + ",");
+        for (int y = border; y < img.getHeight() - border; y++) {
+            for (int x = border; x < img.getWidth() - border; x++) {
                 String out = "";
 
                 for (int j = y - mode; j <= y + mode; j++) {
                     for (int i = x - mode; i <= x + mode; i++) {
-                        // System.out.println("" + i + "," + j);
+                        //System.out.println("" + i + "," + j);
                         Color col = new Color(img.getRGB(i, j), true);
 
                         if (alpha) { // RGB or ARGB

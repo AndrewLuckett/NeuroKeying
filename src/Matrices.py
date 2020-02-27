@@ -12,8 +12,11 @@ class Matrix:
         
         this.height = size[0]
         this.width = size[1]
-        
-        if len(dat) == 0:
+
+        if dat == None:
+            import random
+            this.vals = [random.uniform(0.2,0.8) for i in range(this.height * this.width)] 
+        elif len(dat) == 0:
             this.vals = [0 for i in range(this.height * this.width)] 
         elif len(dat) == this.width * this.height:
             this.vals = dat.copy()

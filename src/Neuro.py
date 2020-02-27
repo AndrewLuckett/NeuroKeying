@@ -10,75 +10,87 @@ class Net:
     def __init__(this, **kwargs):
         if kwargs.get("layers"): #List of matrices
             this.layers = kwargs.get("layers")
-            this.dimension.append(this.layers[0].getSize()[1] - 1)
+            #print(len(this.layers))
+            this.dimension.append(this.layers[0].getSize()[1])
             for i in this.layers:
                 this.dimension.append(i.getSize()[0])
-            
-        elif kwargs.get("dat"): #list of 2d arrays to be turned into matrices
-            pass
         
         elif kwargs.get("dimensions"): #list of ints
             #creates empty matrices of depth int
             this.dimension = kwargs.get("dimensions")
             for i in range(len(this.dimension) - 1):
                 this.layers.append(
-                    Matrix((this.dimension[i + 1], this.dimension[i] + 1)))
+                    Matrix((this.dimension[i + 1], this.dimension[i])))
                 
         else: #Needs some kind of init data
             raise Exception("Insuficient arguments")
 
+        this.biases = kwargs.get("biases") or [Matrix((i,1),[0.5 for j in range(i)]) for i in this.dimension[1:]]
         this.learningRate = kwargs.get("learningRate") or 0.2
         this.activator = kwargs.get("activator") or Activators.Linear()
                 
-    def getOutput(this, inp): #Dont forget bias value
+    def getOutput(this, inp): #Dont use bias in input
         if type(inp) == list:
             inp = Matrix((len(inp), 1), inp)
         if type(inp) != Matrix:
             raise Exception("Invalid argument type")
-        if inp.getSize() != (this.dimension[0] + 1, 1):
+        if inp.getSize() != (this.dimension[0], 1):
             raise Exception("Bad input size")
 
-        for layer in this.layers:
+        for layer, bias in zip(this.layers, this.biases):
             #print("P: "+str(inp))
-            out = layer * inp
+            out = layer * inp #sum(ins * weights)
+            out += bias #Add bias
             out = out.getRaw() #Get as array
             out = this.activator.activator(out) #Apply activator
             
-            inp = out.copy() #Save out for output incase last and temp use inp
-            inp.insert(0, 1.0) #Add 1 at at start as bias for next
-            inp = Matrix((len(inp), 1), inp) #turn into matrix and overwrite inp
+            inp = Matrix((len(out), 1), out) #turn into matrix and overwrite inp
 
-        return Matrix((len(out), 1), out)
+        return inp
+
 
     def learn(this, inp, targetOut):
         if type(inp) == list:
             inp = Matrix((len(inp), 1), inp)
+        if type(inp) != Matrix:
+            raise Exception("Invalid input type")
+        if inp.getSize() != (this.dimension[0], 1):
+            raise Exception("Bad input size")
+        
         if type(targetOut) == list:
             targetOut = Matrix((len(targetOut), 1), targetOut)
-        if type(inp) != Matrix or type(targetOut) != Matrix:
-            raise Exception("Invalid argument type")
-        if inp.getSize() != (this.dimension[0] + 1, 1):
-            raise Exception("Bad input size")
+        if type(targetOut) != Matrix:
+            raise Exception("Invalid output type")
         if targetOut.getSize() != (this.dimension[-1], 1):
             raise Exception("Bad output size")
 
+        # Do Forward pass
         outs = []
-
-        for layer in this.layers:
+        for layer, bias in zip(this.layers, this.biases):
             #print("P: "+str(inp))
-            out = layer * inp
+            out = layer * inp #sum(ins * weights)
+            out += bias #Add bias
             out = out.getRaw() #Get as array
             out = this.activator.activator(out) #Apply activator
-
-            outs.append(Matrix((len(out), 1), out))
             
-            inp = out.copy() #Save out for output incase last and temp use inp
-            inp.insert(0, 1.0) #Add 1 at at start as bias for next
-            inp = Matrix((len(inp), 1), inp) #turn into matrix and overwrite inp
+            inp = Matrix((len(out), 1), out) #turn into matrix and overwrite inp
+            outs.append(inp)
 
-        print("To do")
-        return outs
+        # Calculate Errors
+        rdeltas = []
+        for output in reversed(outs):
+            pass
 
+        
+
+        # Update Biases
+
+        # Update Weights
+
+        #Return SSE
+        return outs,rError
+
+            
 
 
 

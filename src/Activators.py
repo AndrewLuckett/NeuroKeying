@@ -29,31 +29,37 @@ class Linear(Activator):
         if type(inp) == list:
             return this.__listAct__(inp, this.activator)
 
-        if inp > 1:
-            return 1
-        if inp < 0:
-            return 0
         return inp
 
 
     def derivative(this,inp):
         if type(inp) == list:
             return this.__listAct__(inp, this.derivative)
-        return None
+        return 1
 
 
 class Sigmoid(Activator):
+    def singlesig(this,inp):
+        if inp > 100:
+            return 1
+        if inp < -100:
+            return 0
+        return 1 / (1 + exp(-inp))
+        
+
+    
     def activator(this, inp):
         if type(inp) == list:
             return this.__listAct__(inp, this.activator)
         
-        return 1 / (1 + exp(-inp))
+        return this.singlesig(inp)
 
 
     def derivative(this, inp):
         if type(inp) == list:
             return this.__listAct__(inp, this.derivative)
-        return None
+        sso = this.singlesig(inp)
+        return sso * (1 - sso)
 
 
 class Rectlin(Activator):

@@ -20,16 +20,16 @@ class Net:
             this.dimension = kwargs.get("dimensions")
             for i in range(len(this.dimension) - 1):
                 this.layers.append(
-                    Matrix((this.dimension[i + 1], this.dimension[i])))
+                    Matrix((this.dimension[i + 1], this.dimension[i]),None))
                 
         else: #Needs some kind of init data
             raise Exception("Insuficient arguments")
 
-        this.biases = kwargs.get("biases") or [Matrix((i,1),[0.5 for j in range(i)]) for i in this.dimension[1:]]
+        this.biases = kwargs.get("biases") or [Matrix((i,1),[0 for j in range(i)]) for i in this.dimension[1:]]
         this.learningRate = kwargs.get("learningRate") or 0.2
         this.activator = kwargs.get("activator") or Activators.Linear()
                 
-    def getOutput(this, inp): #Dont use bias in input
+    def getOutput(this, inp, measure = None): #Dont use bias in input
         if type(inp) == list:
             inp = Matrix((len(inp), 1), inp)
         if type(inp) != Matrix:
@@ -46,6 +46,12 @@ class Net:
             
             inp = Matrix((len(out), 1), out) #turn into matrix and overwrite inp
 
+        if(measure):
+            se = measure - inp
+            se = se.getRaw()
+            for i in range(len(se)):
+                se[i] *= se[i]
+            return inp, sum(se)
         return inp
 
 
@@ -66,29 +72,58 @@ class Net:
 
         # Do Forward pass
         outs = []
+        inpDat = inp
         for layer, bias in zip(this.layers, this.biases):
             #print("P: "+str(inp))
-            out = layer * inp #sum(ins * weights)
+            out = layer * inpDat #sum(ins * weights)
             out += bias #Add bias
             out = out.getRaw() #Get as array
             out = this.activator.activator(out) #Apply activator
             
-            inp = Matrix((len(out), 1), out) #turn into matrix and overwrite inp
-            outs.append(inp)
+            inpDat = Matrix((len(out), 1), out) #turn into matrix and overwrite inp
+            outs.append(out)
 
         # Calculate Errors
-        rdeltas = []
-        for output in reversed(outs):
-            pass
+        alldeltas = []
+        first = True
+        prevdelta = targetOut.getRaw()
+        for i in range(len(this.layers)-1,-1,-1):
+            deltas = []
+            size = this.layers[i].getSize()
+            
+            for neuron in range(size[0]):
+                error = 0
+                for pdi,pd in enumerate(prevdelta):
+                    if first:
+                        error = pd - outs[i][neuron]
+                    else:
+                        error += pd * this.layers[i+1].getValue((pdi,neuron))
 
-        
+                error *= this.activator.derivative(outs[i][neuron])
 
-        # Update Biases
+                deltas.append(error)
+                
+            alldeltas.append(deltas)
+            prevdelta = deltas
+            first = False
+
+        alldeltas = list(reversed(alldeltas))
+        ins = [inp.getRaw()]
+        ins.extend(outs)
 
         # Update Weights
-
-        #Return SSE
-        return outs,rError
+        for i in range(len(this.layers)):
+            size = this.layers[i].getSize()
+            
+            for n in range(size[0]):
+                this.biases[i].setValue((n,0), this.biases[i].getValue((n,0)) + this.learningRate * alldeltas[i][n])
+                for a in range(size[1]):
+                    dw = this.learningRate * alldeltas[i][n] * ins[i][a]
+                    pos = (n,a)
+                    
+                    this.layers[i].setValue(pos, this.layers[i].getValue(pos) + dw)
+            
+        return outs,alldeltas
 
             
 

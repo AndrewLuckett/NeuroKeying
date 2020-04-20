@@ -15,7 +15,7 @@ class Matrix:
 
         if dat == None:
             import random
-            this.vals = [random.uniform(0.2,0.8) for i in range(this.height * this.width)] 
+            this.vals = [random.uniform(-0.5,0.5) for i in range(this.height * this.width)] 
         elif len(dat) == 0:
             this.vals = [0 for i in range(this.height * this.width)] 
         elif len(dat) == this.width * this.height:
@@ -118,6 +118,9 @@ class Matrix:
 
     def getValue(this, pos):
         return this.vals[pos[0] * this.width + pos[1]]
+
+    def setValue(this, pos, val):
+        this.vals[pos[0] * this.width + pos[1]] = val
 
 
     def getSize(this):
